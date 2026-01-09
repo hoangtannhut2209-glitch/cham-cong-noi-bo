@@ -10,22 +10,22 @@ type AuthState = 'login' | 'register' | 'forgot';
 
 const StaticTitle = () => {
   return (
-    <div className="relative py-10 overflow-hidden h-36 flex flex-col items-center justify-center">
-      {/* Background Kinetic Text - Adjusted slogan, much smaller size, optimized for diacritics */}
-      <div className="absolute inset-0 pointer-events-none opacity-20 flex items-end pb-4 justify-center">
-        <div className="animate-marquee-slow whitespace-nowrap text-[10px] md:text-[11px] font-bold text-white/60 select-none uppercase tracking-[0.4em] py-2">
-          ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp; ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp; ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-        </div>
-      </div>
-
+    <div className="relative py-8 h-auto flex flex-col items-center justify-center overflow-hidden">
       {/* Main Title - Primary Focus */}
-      <div className="relative z-10 text-center animate-in fade-in zoom-in duration-1000 -mt-4">
-        <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase text-white drop-shadow-2xl flex items-center justify-center gap-3">
+      <div className="relative z-10 text-center animate-in fade-in zoom-in duration-1000 w-full">
+        <h1 className="text-[clamp(18px,3.8vw,40px)] font-black uppercase text-white drop-shadow-2xl whitespace-nowrap leading-none tracking-tight flex flex-nowrap items-center justify-center gap-[clamp(3px,0.8vw,8px)] mx-auto px-4">
           <span>CHẤM CÔNG</span>
           <span className="text-orange-500 font-light translate-y-[-2px]">-</span>
           <span className="text-orange-500">HMH</span>
         </h1>
-        <div className="h-1 w-24 bg-gradient-to-r from-transparent via-orange-500 to-transparent mx-auto mt-4 rounded-full opacity-50 animate-pulse"></div>
+        <div className="h-1 w-24 bg-gradient-to-r from-transparent via-orange-500 to-transparent mx-auto mt-3 rounded-full opacity-50 animate-pulse"></div>
+      </div>
+
+      {/* Background Kinetic Text - Adjusted slogan, much smaller size, optimized for diacritics */}
+      <div className="relative h-6 flex items-center justify-center overflow-hidden w-full mt-2">
+        <div className="animate-marquee-slow whitespace-nowrap text-[9px] md:text-[10px] font-bold text-white/40 select-none uppercase tracking-[0.3em]">
+          ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp; ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp; ĐOÀN KẾT &nbsp;&ndash;&nbsp; NHIỆT HUYẾT &nbsp;&ndash;&nbsp; THÀNH CÔNG &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+        </div>
       </div>
 
       <style>{`
