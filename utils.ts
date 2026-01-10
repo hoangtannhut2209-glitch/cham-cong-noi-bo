@@ -1,5 +1,5 @@
 
-import { format, parse, differenceInMinutes, isAfter, setHours, setMinutes } from 'date-fns';
+import { format, differenceInMinutes, isAfter } from 'date-fns';
 
 /**
  * Calculates OT: max(0, clockOut - 17:00), no multiplier.
@@ -7,8 +7,14 @@ import { format, parse, differenceInMinutes, isAfter, setHours, setMinutes } fro
  */
 export const calculateOT = (clockOutStr: string): number => {
   try {
-    const clockOut = parse(clockOutStr, 'HH:mm', new Date());
-    const cutoff = setMinutes(setHours(new Date(), 17), 0);
+    // Manually parse HH:mm as 'parse' is not available from date-fns
+    const [hours, minutes] = clockOutStr.split(':').map(Number);
+    const clockOut = new Date();
+    clockOut.setHours(hours, minutes, 0, 0);
+    
+    // Use native Date.setHours instead of missing date-fns setHours/setMinutes
+    const cutoff = new Date();
+    cutoff.setHours(17, 0, 0, 0);
     
     if (isAfter(clockOut, cutoff)) {
       const diffMinutes = differenceInMinutes(clockOut, cutoff);
@@ -27,16 +33,25 @@ export const calculateOT = (clockOutStr: string): number => {
  */
 export const calculateWorkHours = (inStr: string, outStr: string): number => {
   if (!inStr || !outStr) return 0;
-  const clockIn = parse(inStr, 'HH:mm', new Date());
-  const clockOut = parse(outStr, 'HH:mm', new Date());
+  
+  // Manually parse times as 'parse' is not available
+  const [inH, inM] = inStr.split(':').map(Number);
+  const clockIn = new Date();
+  clockIn.setHours(inH, inM, 0, 0);
+
+  const [outH, outM] = outStr.split(':').map(Number);
+  const clockOut = new Date();
+  clockOut.setHours(outH, outM, 0, 0);
   
   const totalMinutes = differenceInMinutes(clockOut, clockIn);
   if (totalMinutes <= 0) return 0;
 
   // Subtract lunch break if overlap occurs
   // Break start: 11:45, Break end: 13:15
-  const breakStart = setMinutes(setHours(new Date(), 11), 45);
-  const breakEnd = setMinutes(setHours(new Date(), 13), 15);
+  const breakStart = new Date();
+  breakStart.setHours(11, 45, 0, 0);
+  const breakEnd = new Date();
+  breakEnd.setHours(13, 15, 0, 0);
   
   let actualWorkMinutes = totalMinutes;
   

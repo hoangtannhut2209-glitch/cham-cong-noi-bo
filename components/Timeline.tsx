@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { User, AttendanceRecord, AppSettings } from '../types';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDate, getDay, parseISO } from 'date-fns';
+import { format, endOfMonth, eachDayOfInterval, getDate, getDay } from 'date-fns';
 import * as XLSX from 'xlsx';
 
 interface TimelineProps {
@@ -13,8 +13,11 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({ user, records, allUsers, settings }) => {
   const [deptFilter, setDeptFilter] = useState('All');
+  const [deptSearch, setDeptSearch] = useState('');
+  const [isDeptOpen, setIsDeptOpen] = useState(false);
   const currentMonth = new Date();
-  const monthStart = startOfMonth(currentMonth);
+  
+  const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
@@ -29,6 +32,10 @@ const Timeline: React.FC<TimelineProps> = ({ user, records, allUsers, settings }
 
   const filteredUsers = deptFilter === 'All' ? allUsers : allUsers.filter(u => u.department === deptFilter);
   const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+  const filteredDepartments = settings.departments.filter(d => 
+    d.toLowerCase().includes(deptSearch.toLowerCase())
+  );
 
   const exportTimelineExcel = () => {
     const headerRow1 = ["DANH SÁCH CHI TIẾT CHẤM CÔNG - HMH"];
@@ -52,56 +59,97 @@ const Timeline: React.FC<TimelineProps> = ({ user, records, allUsers, settings }
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="space-y-8 pb-12">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 shadow-inner">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 bg-orange-100 rounded-3xl flex items-center justify-center text-orange-600 shadow-xl border-b-4 border-orange-200">
             <i className="fa-solid fa-calendar-days text-2xl"></i>
           </div>
           <div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Timeline</h2>
-            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Lịch sử chấm công chi tiết</p>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Timeline</h2>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mt-1 italic">Lịch sử chấm công chi tiết</p>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm">
-          <select 
-            value={deptFilter}
-            onChange={(e) => setDeptFilter(e.target.value)}
-            className="px-5 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black text-slate-600 outline-none focus:ring-2 focus:ring-orange-500/20 cursor-pointer"
-          >
-            <option value="All">Tất cả phòng ban</option>
-            {settings.departments.map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl overflow-hidden shadow-inner">
-            <button className="px-4 py-2.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition-colors border-r border-slate-200">
+        <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-[2rem] border border-slate-100 shadow-sm relative z-50">
+          {/* Enhanced Searchable Department Filter */}
+          <div className="relative group">
+            <div 
+              onClick={() => setIsDeptOpen(!isDeptOpen)}
+              className={`flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 cursor-pointer hover:border-orange-500 transition-all min-w-[200px] ${isDeptOpen ? 'border-orange-500 shadow-lg shadow-orange-500/5' : ''}`}
+            >
+              <i className="fa-solid fa-building-user text-slate-300"></i>
+              <span className="text-xs font-black text-slate-600 uppercase tracking-widest flex-1 truncate">
+                {deptFilter === 'All' ? 'Tất cả phòng ban' : deptFilter}
+              </span>
+              <i className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform ${isDeptOpen ? 'rotate-180' : ''}`}></i>
+            </div>
+
+            {isDeptOpen && (
+              <div className="absolute top-full left-0 mt-3 w-72 bg-white rounded-3xl border border-slate-100 shadow-[0_30px_60px_rgba(0,0,0,0.1)] p-4 animate-in slide-in-from-top-2 duration-300 overflow-hidden">
+                <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 mb-4 group focus-within:border-orange-500 transition-all">
+                  <i className="fa-solid fa-magnifying-glass text-[10px] text-slate-300 group-focus-within:text-orange-500"></i>
+                  <input 
+                    type="text" 
+                    placeholder="Tìm phòng ban..."
+                    className="bg-transparent text-xs font-bold text-slate-700 outline-none w-full"
+                    value={deptSearch}
+                    onChange={(e) => setDeptSearch(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className="max-h-64 overflow-y-auto pr-2 space-y-1 scrollbar-thin scrollbar-thumb-slate-200">
+                  <button 
+                    onClick={() => { setDeptFilter('All'); setIsDeptOpen(false); }}
+                    className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${deptFilter === 'All' ? 'bg-orange-500 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    Tất cả phòng ban
+                  </button>
+                  {filteredDepartments.map(d => (
+                    <button 
+                      key={d}
+                      onClick={() => { setDeptFilter(d); setIsDeptOpen(false); }}
+                      className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${deptFilter === d ? 'bg-orange-500 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                  {filteredDepartments.length === 0 && (
+                    <p className="text-[10px] text-slate-400 text-center py-4 font-bold italic">Không tìm thấy phòng ban</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-2xl overflow-hidden shadow-inner">
+            <button className="px-4 py-3 hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition-colors border-r border-slate-200">
               <i className="fa-solid fa-chevron-left text-[10px]"></i>
             </button>
-            <span className="px-6 py-2.5 font-black text-xs text-slate-700 uppercase tracking-widest">
+            <span className="px-6 py-3 font-black text-xs text-slate-700 uppercase tracking-widest">
               {format(currentMonth, 'MMMM yyyy')}
             </span>
-            <button className="px-4 py-2.5 hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition-colors border-l border-slate-200">
+            <button className="px-4 py-3 hover:bg-orange-50 text-slate-400 hover:text-orange-500 transition-colors border-l border-slate-200">
               <i className="fa-solid fa-chevron-right text-[10px]"></i>
             </button>
           </div>
+
           <button 
             onClick={exportTimelineExcel}
-            className="flex items-center gap-3 px-6 py-2.5 bg-orange-500 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-lg shadow-orange-100 active:scale-95"
+            className="flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-orange-500 transition-all shadow-lg active:scale-95 group"
           >
-            <i className="fa-solid fa-download"></i>
+            <i className="fa-solid fa-download group-hover:animate-bounce"></i>
             Tải Excel Grid
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl shadow-slate-200/40 overflow-hidden relative">
+      <div className="bg-white rounded-[3rem] border border-slate-100 shadow-[0_30px_60px_rgba(0,0,0,0.02)] overflow-hidden relative">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
           <table className="w-full text-left border-collapse min-w-[1400px]">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-8 py-6 sticky left-0 bg-white z-20 w-72 border-b border-slate-100">
+                <th className="px-8 py-6 sticky left-0 bg-white z-20 w-72 border-b border-slate-100 shadow-[4px_0_10px_rgba(0,0,0,0.02)]">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nhân sự</span>
                 </th>
                 {days.map(day => {
@@ -121,7 +169,7 @@ const Timeline: React.FC<TimelineProps> = ({ user, records, allUsers, settings }
             <tbody className="divide-y divide-slate-50">
               {filteredUsers.map(u => (
                 <tr key={u.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-8 py-5 sticky left-0 bg-white group-hover:bg-slate-50/50 z-20 transition-colors">
+                  <td className="px-8 py-5 sticky left-0 bg-white group-hover:bg-slate-50/50 z-20 transition-colors shadow-[4px_0_10px_rgba(0,0,0,0.02)]">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-[10px] font-black shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
                         {u.name.split(' ').map(n => n[0]).join('').slice(-3).toUpperCase()}

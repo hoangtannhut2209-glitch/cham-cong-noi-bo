@@ -1,5 +1,5 @@
-
 {
   "name": "Chấm Công - HMH Assistant Pro",
-  "description": "Hệ thống quản lý chấm công chuyên nghiệp giúp tự động hóa giờ ra, tính OT chính xác (làm tròn 0.5h) và báo cáo Excel chuẩn doanh nghiệp."
+  "description": "Hệ thống quản lý chấm công chuyên nghiệp giúp tự động hóa giờ ra, tính OT chính xác (làm tròn 0.5h) và báo cáo Excel chuẩn doanh nghiệp.",
+  "requestFramePermissions": []
 }

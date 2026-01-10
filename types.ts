@@ -1,14 +1,13 @@
 
-export type Role = 'Admin' | 'Employee';
+export type Role = 'Admin' | 'User';
 export type Language = 'vi' | 'en';
 
 export interface User {
   id: string;
-  email: string;
   name: string;
   role: Role;
   department: string;
-  username?: string;
+  username: string;
   password?: string;
   avatar?: string;
 }
